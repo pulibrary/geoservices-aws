@@ -5,18 +5,22 @@ from aws_cdk import (
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_iam as iam,
-    aws_s3 as s3
+    aws_s3 as s3,
+    aws_wafv2 as waf
 )
 from constructs import Construct
+from helpers.ip_list import IpList
 
 class GeoservicesStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, stage: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # geo storage bucket
+        ## geo storage bucket
         bucket_name = f"figgy-geo-{stage}"
         bucket_arn = f"arn:aws:s3:::figgy-geo-{stage}"
         bucket = s3.Bucket.from_bucket_arn(self, bucket_name, bucket_arn)
+
+        ## cloudfront
 
         # certificate
         if stage == "staging":
@@ -36,31 +40,80 @@ class GeoservicesStack(Stack):
         #     validation=certificatemanager.CertificateValidation.from_dns()
         # )
         #
-        ## cloudfront
 
-        # Use titiler policy
+        # IP Set
+        ipset_ip4 = waf.CfnIPSet(self, f"geodata-{stage}-ip4-ipset",
+            addresses=IpList().ip4(),
+            ip_address_version="IPV4",
+            scope="CLOUDFRONT",
+            description="On Campus and VPN IP4 Addresses",
+            name=f"geodata-{stage}-ip4-ipset",
+        )
+
+        ipset_ip6 = waf.CfnIPSet(self, f"geodata-{stage}-ip6-ipset",
+            addresses=IpList().ip6(),
+            ip_address_version="IPV6",
+            scope="CLOUDFRONT",
+            description="On Campus and VPN IP6 Addresses",
+            name=f"geodata-{stage}-ip6-ipset",
+        )
+
+        # Web Application Firewall
+        ruleIPMatch = waf.CfnWebACL.RuleProperty(
+            name     = 'IPMatch',
+            priority =  0,
+            action   = waf.CfnWebACL.RuleActionProperty(
+                block={}
+            ),
+            statement = waf.CfnWebACL.StatementProperty(
+                or_statement = waf.CfnWebACL.OrStatementProperty(
+                    statements = [
+                        waf.CfnWebACL.StatementProperty(
+                            not_statement = waf.CfnWebACL.NotStatementProperty(
+                                statement = waf.CfnWebACL.StatementProperty(
+                                    ip_set_reference_statement = waf.CfnWebACL.IPSetReferenceStatementProperty(
+                                        arn=ipset_ip4.attr_arn
+                                    )
+                                )
+                            )
+                        ),
+                        waf.CfnWebACL.StatementProperty(
+                            not_statement = waf.CfnWebACL.NotStatementProperty(
+                                statement = waf.CfnWebACL.StatementProperty(
+                                    ip_set_reference_statement = waf.CfnWebACL.IPSetReferenceStatementProperty(
+                                        arn=ipset_ip6.attr_arn
+                                    )
+                                )
+                            )
+                        )
+                    ]
+                )
+            ),
+            visibility_config = waf.CfnWebACL.VisibilityConfigProperty(
+                cloud_watch_metrics_enabled = True,
+                metric_name                 = 'IPMatch',
+                sampled_requests_enabled    = True
+            )
+        )
+
+        firewall = waf.CfnWebACL(self, f"geodata-{stage}-waf",
+            scope = "CLOUDFRONT",
+            description = f"Firewall for restricted geodata content in {stage}",
+            name = f"geodata-{stage}-waf",
+            default_action=waf.CfnWebACL.DefaultActionProperty(allow=waf.CfnWebACL.AllowActionProperty(), block=None),
+            rules=[ruleIPMatch],
+            visibility_config = waf.CfnWebACL.VisibilityConfigProperty(
+                cloud_watch_metrics_enabled = True,
+                metric_name                 = 'geodatawaf',
+                sampled_requests_enabled    = True
+            )
+        )
+
+        # Use titiler response policy
         response_headers_policy = cloudfront.ResponseHeadersPolicy.from_response_headers_policy_id(
                 self,
                 f"geodata-{stage}-responseheaderspolicy",
                 response_headers_policy_id="36af6d78-3c4e-4e15-903f-73b542589a60")
-
-        # response_headers_policy = cloudfront.ResponseHeadersPolicy(self, f"geodata-{stage}-responseheaderspolicy",
-        #     response_headers_policy_name=f"geodata-{stage}-responseheaders",
-        #     comment="custom response policy with cache-control max-age set to match ttl",
-        #     cors_behavior=cloudfront.ResponseHeadersCorsBehavior(
-        #         access_control_allow_credentials=False,
-        #         access_control_allow_headers=["*"],
-        #         access_control_allow_methods=["all"],
-        #         access_control_allow_origins=["*"],
-        #         access_control_expose_headers=["*"],
-        #         origin_override=True
-        #     ),
-        #     custom_headers_behavior=cloudfront.ResponseCustomHeadersBehavior(
-        #         custom_headers=[cloudfront.ResponseCustomHeader(header="cache-control",
-        #                                                         value="public, max-age= 31536000",
-        #                                                         override=True)]
-        #     )
-        # )
 
         public_distribution = cloudfront.Distribution(self, f"geodata-public-{stage}-distribution",
             # certificate=public_certificate,
@@ -78,6 +131,7 @@ class GeoservicesStack(Stack):
         restricted_distribution = cloudfront.Distribution(self, f"geodata-restricted-{stage}-distribution",
             # certificate=restricted_certificate,
             # domain_names=[custom_restricted_domain],
+            web_acl_id = firewall.attr_arn,
             default_behavior=cloudfront.BehaviorOptions(
                 origin=origins.S3Origin(bucket),
                 cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED,

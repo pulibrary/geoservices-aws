@@ -1,0 +1,120 @@
+import socket
+
+class IpList:
+    def ip4(self):
+        return self.campus_ip4() + self.global_protect_ips()
+    def ip6(self):
+        return self.campus_ip6()
+    def campus_ip4(self):
+        return [ "128.112.0.0/16",
+                "140.180.0.0/16",
+                "204.153.48.0/23",
+                "66.180.176.0/24",
+                "66.180.177.0/24",
+                "66.180.180.0/22",
+                "172.20.192.0/19",
+                "172.20.95.0/24",
+                "137.83.217.151/32",
+                "128.112.64.96/27",
+                "128.112.64.224/27",
+                "128.112.65.0/24",
+                "128.112.66.0/23",
+                "128.112.68.0/22" ]
+    def campus_ip6(self):
+        return [ "2001:470:10e::/48",
+                "2620:c4::/48",
+                "2604:4540::/32"]
+    def host_to_ip(self, hostname):
+        try:
+            ip = socket.gethostbyname(hostname)
+            return f"{ip}/32"
+        except:
+            pass
+    def global_protect_ips(self):
+        fqdns = self.global_protect_fqdns()
+        ips = list(map(self.host_to_ip, fqdns))
+        return [i for i in ips if i is not None]
+    def global_protect_fqdns(self):
+       return [ "us-west-g-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "us-southeast-g-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "mexico-central-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "us-central-g-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "canada-east-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "costa-rica-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "us-northeast-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "canada-west-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "us-east-g-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "us-south-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "us-northwest-g-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "us-southwest-g-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "brazil-central-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "colombia-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "peru-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "ecuador-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "bolivia-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "venezuela-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "brazil-south-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "chile-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "argentina-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "egypt-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "kenya-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "nigeria-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "south-africa-central-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "indonesia-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "japan-central-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "russia-central-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "united-arab-emirates-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "turkey-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "russia-northwest-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "thailand-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "india-north-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "taiwan-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "pakistan-south-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "india-south-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "kuwait-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "israel-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "saudi-arabia-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "bh-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "philippines-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "kr-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "vietnam-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "hong-kong-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "bangladesh-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "singapore-g-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "germany-central-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "romania-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "portugal-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "greece-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "austria-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "hungary-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "ie-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "spain-central-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "italy-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "lithuania-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "sweden-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "andorra-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "slovakia-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "germany-north-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "norway-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "fr-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "monaco-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "netherlands-central-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "czech-republic-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "belgium-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "ukraine-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "uzbekistan-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "luxembourg-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "denmark-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "finland-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "moldova-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "liechtenstein-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "croatia-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "uk-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "switzerland-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "poland-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "bulgaria-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "papua-new-guinea-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "australia-south-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "australia-southeast-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "new-zealand-princeto.gpogn2y5gg2j.gw.gpcloudservice.com",
+                "australia-east-princeto.gpogn2y5gg2j.gw.gpcloudservice.com"]
