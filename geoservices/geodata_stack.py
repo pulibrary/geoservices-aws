@@ -24,7 +24,7 @@ class GeodataStack(Stack):
 
         # certificate
         if stage == "staging":
-            custom_public_domain = "geodata-staging.princeton.edu"
+            custom_public_domain = "geodata-staging.library.princeton.edu"
             custom_restricted_domain = "geodata-restricted-staging.library.princeton.edu"
         else:
             custom_public_domain = "geodata.princeton.edu"
