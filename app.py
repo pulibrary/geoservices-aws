@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 import os
-
 import aws_cdk as cdk
-
-from geoservices.geoservices_stack import GeoservicesStack
-
+from geoservices.geodata_stack import GeodataStack
 
 app = cdk.App()
-GeoservicesStack(
+GeodataStack(
     app,
     "geodata-staging",
     stage="staging",

@@ -11,7 +11,7 @@ from aws_cdk import (
 from constructs import Construct
 from helpers.ip_list import IpList
 
-class GeoservicesStack(Stack):
+class GeodataStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, stage: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
