@@ -24,22 +24,25 @@ class GeodataStack(Stack):
 
         # certificate
         if stage == "staging":
-            custom_public_domain = "geodata-staging.library.princeton.edu"
-            custom_restricted_domain = "geodata-restricted-staging.library.princeton.edu"
+            custom_public_domain = "geodata-staging.lib.princeton.edu"
+            public_cert_arn = f"arn:aws:acm:us-east-1:{self.account}:certificate/fa154918-05c2-4fa9-b5f1-0efad11ae1c2"
+            custom_restricted_domain = "geodata-restricted-staging.lib.princeton.edu"
+            restricted_cert_arn = f"arn:aws:acm:us-east-1:{self.account}:certificate/32ff0b31-d108-4bb5-841e-b272aa4ebbce"
         else:
-            custom_public_domain = "geodata.princeton.edu"
-            custom_restricted_domain = "geodata-restricted.library.princeton.edu"
+            custom_public_domain = "geodata.lib.princeton.edu"
+            public_cert_arn = f"arn:aws:acm:us-east-1:{self.account}:certificate/33374ebc-6185-4ff6-b32c-f406d6234178"
+            custom_restricted_domain = "geodata-restricted.lib.princeton.edu"
+            restricted_cert_arn = f"arn:aws:acm:us-east-1:{self.account}:certificate/0526ff5f-4a4d-4a94-8913-6155d75016b3"
 
-        # public_certificate = certificatemanager.Certificate(self, f"geodata-{stage}-certificate",
-        #     domain_name=custom_public_domain,
-        #     validation=certificatemanager.CertificateValidation.from_dns()
-        # )
-        #
-        # restricted_certificate = certificatemanager.Certificate(self, f"geodata-restricted-{stage}-certificate",
-        #     domain_name=custom_restricted_domain,
-        #     validation=certificatemanager.CertificateValidation.from_dns()
-        # )
-        #
+        public_certificate = certificatemanager.Certificate.from_certificate_arn(self,
+            f"geodata-{stage}-certificate",
+            public_cert_arn
+        )
+
+        restricted_certificate = certificatemanager.Certificate.from_certificate_arn(self,
+            f"geodata-restricted-{stage}-certificate",
+            restricted_cert_arn
+        )
 
         # IP Set
         ipset_ip4 = waf.CfnIPSet(self, f"geodata-{stage}-ip4-ipset",
@@ -116,8 +119,8 @@ class GeodataStack(Stack):
                 response_headers_policy_id="36af6d78-3c4e-4e15-903f-73b542589a60")
 
         public_distribution = cloudfront.Distribution(self, f"geodata-public-{stage}-distribution",
-            # certificate=public_certificate,
-            # domain_names=[custom_public_domain],
+            certificate=public_certificate,
+            domain_names=[custom_public_domain],
             default_behavior=cloudfront.BehaviorOptions(
                 origin=origins.S3Origin(bucket),
                 cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED,
@@ -129,8 +132,8 @@ class GeodataStack(Stack):
         )
 
         restricted_distribution = cloudfront.Distribution(self, f"geodata-restricted-{stage}-distribution",
-            # certificate=restricted_certificate,
-            # domain_names=[custom_restricted_domain],
+            certificate=restricted_certificate,
+            domain_names=[custom_restricted_domain],
             web_acl_id = firewall.attr_arn,
             default_behavior=cloudfront.BehaviorOptions(
                 origin=origins.S3Origin(bucket),
