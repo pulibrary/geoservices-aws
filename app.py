@@ -11,4 +11,11 @@ GeodataStack(
     env=cdk.Environment(account=os.getenv('cdk_default_account'), region=os.getenv('cdk_default_region'))
 )
 
+GeodataStack(
+    app,
+    "geodata-production",
+    stage="production",
+    env=cdk.Environment(account=os.getenv('cdk_default_account'), region=os.getenv('cdk_default_region'))
+)
+
 app.synth()
