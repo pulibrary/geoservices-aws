@@ -66,27 +66,19 @@ class GeodataStack(Stack):
             name     = 'IPMatch',
             priority =  0,
             action   = waf.CfnWebACL.RuleActionProperty(
-                block={}
+                allow=waf.CfnWebACL.AllowActionProperty(), block=None
             ),
             statement = waf.CfnWebACL.StatementProperty(
                 or_statement = waf.CfnWebACL.OrStatementProperty(
                     statements = [
                         waf.CfnWebACL.StatementProperty(
-                            not_statement = waf.CfnWebACL.NotStatementProperty(
-                                statement = waf.CfnWebACL.StatementProperty(
-                                    ip_set_reference_statement = waf.CfnWebACL.IPSetReferenceStatementProperty(
-                                        arn=ipset_ip4.attr_arn
-                                    )
-                                )
+                            ip_set_reference_statement = waf.CfnWebACL.IPSetReferenceStatementProperty(
+                                arn=ipset_ip4.attr_arn
                             )
                         ),
                         waf.CfnWebACL.StatementProperty(
-                            not_statement = waf.CfnWebACL.NotStatementProperty(
-                                statement = waf.CfnWebACL.StatementProperty(
-                                    ip_set_reference_statement = waf.CfnWebACL.IPSetReferenceStatementProperty(
-                                        arn=ipset_ip6.attr_arn
-                                    )
-                                )
+                            ip_set_reference_statement = waf.CfnWebACL.IPSetReferenceStatementProperty(
+                                arn=ipset_ip6.attr_arn
                             )
                         )
                     ]
@@ -103,7 +95,7 @@ class GeodataStack(Stack):
             scope = "CLOUDFRONT",
             description = f"Firewall for restricted geodata content in {stage}",
             name = f"geodata-{stage}-waf",
-            default_action=waf.CfnWebACL.DefaultActionProperty(allow=waf.CfnWebACL.AllowActionProperty(), block=None),
+            default_action=waf.CfnWebACL.DefaultActionProperty(block=waf.CfnWebACL.BlockActionProperty(), allow=None),
             rules=[ruleIPMatch],
             visibility_config = waf.CfnWebACL.VisibilityConfigProperty(
                 cloud_watch_metrics_enabled = True,
