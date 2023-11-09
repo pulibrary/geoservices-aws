@@ -28,10 +28,6 @@ class GenericHandler:
               params['url'] = item_url
               params.pop('id')
 
-      # Add rescale parameter to ensure tile images are rendered correctly
-      if ('rescale' not in params):
-          params['rescale'] = '0,255'
-
       request['querystring'] = urlencode(params)
       return request
 
