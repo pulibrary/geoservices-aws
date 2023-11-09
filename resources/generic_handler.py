@@ -17,12 +17,15 @@ class GenericHandler:
       params = {k : v[0] for k, v in parse_qs(request['querystring']).items()}
 
       if ('id' in params and 'url' not in params):
-              if ('mosaicjson' in request['uri'] or 'cog' in request['uri']):
+              if ('cog' in request['uri']):
                   # Strategy - fetch S3 URL from
                   # https://figgy.princeton.edu/concern/raster_resources/<id>/mosaic.json,
                   # parse JSON and get URI parameter.
                   item_id = params['id']
-                  item_url = self.s3_url(item_id)
+                  item_url = self.cog_s3_url(item_id)
+              elif ('mosaicjson' in request['uri']):
+                  item_id = params['id']
+                  item_url = self.mosaic_s3_url(item_id)
 
               # Replace id param with url param
               params['url'] = item_url
@@ -37,7 +40,14 @@ class GenericHandler:
         else:
             return f"https://figgy-staging.princeton.edu/tilemetadata/{resource_id}"
 
-    def s3_url(self, resource_id):
+    def mosaic_s3_url(self, resource_id):
+        path = f"{resource_id[0:2]}/{resource_id[2:4]}/{resource_id[4:6]}/{resource_id}/mosaic.json"
+        if self.stage == "production":
+            return f"s3://figgy-geo-production/{path}"
+        else:
+            return f"s3://figgy-geo-staging/{path}"
+
+    def cog_s3_url(self, resource_id):
         http = urllib3.PoolManager()
         resp = http.request('GET', self.resource_uri(resource_id))
         return json.loads(resp.data.decode('utf8'))["uri"]

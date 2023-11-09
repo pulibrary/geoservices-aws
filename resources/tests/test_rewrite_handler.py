@@ -13,7 +13,7 @@ def test_rewrites_mosaic_id_production():
     with mock.patch('urllib3.PoolManager', return_value=http_mock):
         event = {'Records': [{'cf': {'request': {'uri': 'https://test.com/mosaicjson', 'querystring': 'id=banana'}}}]}
         output = handler_production(event, {})
-        assert output['querystring'] == 'url=s3%3A%2F%2Ffiggy-geo-production%2Fba%2Fna%2Fna%2Fbanana%2Fmosaic-34.json'
+        assert output['querystring'] == 'url=s3%3A%2F%2Ffiggy-geo-production%2Fba%2Fna%2Fna%2Fbanana%2Fmosaic.json'
 
 # Don't re-process URL if one is given.
 def test_keeps_existing_uri_production():
@@ -41,7 +41,7 @@ def test_rewrites_mosaic_id_staging():
     with mock.patch('urllib3.PoolManager', return_value=http_mock):
         event = {'Records': [{'cf': {'request': {'uri': 'https://test.com/mosaicjson', 'querystring': 'id=banana'}}}]}
         output = handler_staging(event, {})
-        assert output['querystring'] == 'url=s3%3A%2F%2Ffiggy-geo-staging%2Fba%2Fna%2Fna%2Fbanana%2Fmosaic-34.json'
+        assert output['querystring'] == 'url=s3%3A%2F%2Ffiggy-geo-staging%2Fba%2Fna%2Fna%2Fbanana%2Fmosaic.json'
 
 def test_rewrites_cog_id_staging():
     http_mock = TestHelper().http_mock("s3://figgy-geo-staging/ba/na/na/banana/display_raster.tif")
