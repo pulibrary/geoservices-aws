@@ -20,24 +20,7 @@ class GenericHandler:
       else:
         params = {}
 
-      parsed_uri = urlparse(request['uri'])
-      base_path = parsed_uri.path.split('/')
-
-      if (len(base_path) > 2 and base_path[2] == 'mosaicjson'):
-          item_id = base_path[1]
-          item_url = self.mosaic_s3_url(item_id)
-          base_path.pop(1)
-          parsed_uri = parsed_uri._replace(path = '/'.join(base_path))
-          request['uri'] = urlunparse(parsed_uri)
-          params['url'] = item_url
-      elif (len(base_path) > 2 and base_path[2] == 'cog'):
-          item_id = base_path[1]
-          item_url = self.cog_s3_url(item_id)
-          base_path.pop(1)
-          parsed_uri = parsed_uri._replace(path = '/'.join(base_path))
-          request['uri'] = urlunparse(parsed_uri)
-          params['url'] = item_url
-      elif ('id' in params and 'url' not in params):
+      if ('id' in params and 'url' not in params):
           if ('cog' in request['uri']):
             # Strategy - fetch S3 URL from
             # https://figgy.princeton.edu/tilemetadata/<id>,
