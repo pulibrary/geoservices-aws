@@ -1,6 +1,7 @@
-from urllib.parse import parse_qs, urlencode
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 import urllib3
 import json
+import pdb
 
 class GenericHandler:
     def __init__(self, stage):
@@ -14,22 +15,42 @@ class GenericHandler:
 
     def handle(self, event, context):
       request = event['Records'][0]['cf']['request']
-      params = {k : v[0] for k, v in parse_qs(request['querystring']).items()}
+      if 'querystring' in request:
+        params = {k : v[0] for k, v in parse_qs(request['querystring']).items()}
+      else:
+        params = {}
 
-      if ('id' in params and 'url' not in params):
-              if ('cog' in request['uri']):
-                  # Strategy - fetch S3 URL from
-                  # https://figgy.princeton.edu/concern/raster_resources/<id>/mosaic.json,
-                  # parse JSON and get URI parameter.
-                  item_id = params['id']
-                  item_url = self.cog_s3_url(item_id)
-              elif ('mosaicjson' in request['uri']):
-                  item_id = params['id']
-                  item_url = self.mosaic_s3_url(item_id)
+      parsed_uri = urlparse(request['uri'])
+      base_path = parsed_uri.path.split('/')
 
-              # Replace id param with url param
-              params['url'] = item_url
-              params.pop('id')
+      if (len(base_path) > 2 and base_path[2] == 'mosaicjson'):
+          item_id = base_path[1]
+          item_url = self.mosaic_s3_url(item_id)
+          base_path.pop(1)
+          parsed_uri = parsed_uri._replace(path = '/'.join(base_path))
+          request['uri'] = urlunparse(parsed_uri)
+          params['url'] = item_url
+      elif (len(base_path) > 2 and base_path[2] == 'cog'):
+          item_id = base_path[1]
+          item_url = self.cog_s3_url(item_id)
+          base_path.pop(1)
+          parsed_uri = parsed_uri._replace(path = '/'.join(base_path))
+          request['uri'] = urlunparse(parsed_uri)
+          params['url'] = item_url
+      elif ('id' in params and 'url' not in params):
+          if ('cog' in request['uri']):
+            # Strategy - fetch S3 URL from
+            # https://figgy.princeton.edu/tilemetadata/<id>,
+            # parse JSON and get URI parameter.
+            item_id = params['id']
+            item_url = self.cog_s3_url(item_id)
+          elif ('mosaicjson' in request['uri']):
+            item_id = params['id']
+            item_url = self.mosaic_s3_url(item_id)
+
+          # Replace id param with url param
+          params['url'] = item_url
+          params.pop('id')
 
       request['querystring'] = urlencode(params)
       return request
