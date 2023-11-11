@@ -1,7 +1,6 @@
-from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from urllib.parse import parse_qs, urlencode
 import urllib3
 import json
-import pdb
 
 class GenericHandler:
     def __init__(self, stage):
@@ -34,6 +33,9 @@ class GenericHandler:
           # Replace id param with url param
           params['url'] = item_url
           params.pop('id')
+
+      # Add stage parameter
+      params['stage'] = self.stage
 
       request['querystring'] = urlencode(params)
       return request
