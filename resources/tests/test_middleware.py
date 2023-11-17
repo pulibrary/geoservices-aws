@@ -1,6 +1,5 @@
 import pytest
 import json
-import unittest.mock as mock
 
 from fastapi import FastAPI, Request
 from starlette.testclient import TestClient

@@ -11,6 +11,4 @@ mock = "*"
 fastapi = "*"
 starlette = "*"
 httpx = "*"
-
-[requires]
-python_version = "3.11.1"
+urllib3 = "*"
