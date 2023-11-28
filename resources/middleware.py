@@ -16,9 +16,9 @@ class HostMiddleware:
             return
 
         request = Request(scope)
-        headers = dict(request.scope["headers"])
-        headers["host"] = os.getenv("TITILER_BASE_URL")
-        request.scope["headers"] = [(k, v) for k, v in headers.items()]
+        headers = dict(scope["headers"])
+        headers[b"host"] = bytes(os.getenv("TITILER_BASE_URL"), 'utf-8')
+        scope["headers"] = [(k, v) for k, v in headers.items()]
 
         self.stage = request.query_params["stage"]
 
