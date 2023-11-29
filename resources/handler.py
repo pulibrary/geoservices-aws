@@ -9,6 +9,7 @@ from fastapi import Response
 
 # Add middleware to set host header
 app.add_middleware(middleware.HostMiddleware)
+app.add_middleware(middleware.RewriteMiddleware)
 
 logging.getLogger("mangum.lifespan").setLevel(logging.ERROR)
 logging.getLogger("mangum.http").setLevel(logging.ERROR)

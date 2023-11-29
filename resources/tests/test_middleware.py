@@ -3,7 +3,7 @@ import json
 
 from fastapi import FastAPI, Request
 from starlette.testclient import TestClient
-from middleware import HostMiddleware
+from middleware import HostMiddleware, RewriteMiddleware
 
 def test_staging_middleware_for_mosaics_with_id_in_url(monkeypatch):
     monkeypatch.setenv('TITILER_BASE_URL', 'base_url')
@@ -15,6 +15,7 @@ def test_staging_middleware_for_mosaics_with_id_in_url(monkeypatch):
         return json.dumps(request_args)
 
     app.add_middleware(HostMiddleware)
+    app.add_middleware(RewriteMiddleware)
 
     with TestClient(app) as client:
         response = client.get('/123456/mosaicjson?stage=staging')
@@ -30,6 +31,7 @@ def test_production_middleware_for_mosaics_with_id_in_url(monkeypatch):
         return json.dumps(request_args)
 
     app.add_middleware(HostMiddleware)
+    app.add_middleware(RewriteMiddleware)
 
     with TestClient(app) as client:
         response = client.get('/123456/mosaicjson?stage=production')
@@ -45,6 +47,7 @@ def test_staging_middleware_for_cogs_with_id_in_url(monkeypatch):
         return json.dumps(request_args)
 
     app.add_middleware(HostMiddleware)
+    app.add_middleware(RewriteMiddleware)
 
     with TestClient(app) as client:
         response = client.get('/123456/cog?stage=staging')
@@ -60,6 +63,7 @@ def test_production_middleware_for_cogs_with_id_in_url(monkeypatch):
         return json.dumps(request_args)
 
     app.add_middleware(HostMiddleware)
+    app.add_middleware(RewriteMiddleware)
 
     with TestClient(app) as client:
         response = client.get('/123456/cog?stage=production')
