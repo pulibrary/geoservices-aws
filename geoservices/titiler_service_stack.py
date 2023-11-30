@@ -58,24 +58,6 @@ class TitilerServiceStack(Stack):
             environment=env,
         )
 
-        # Rewrite Lambda Definition
-        # There is one rewrite handle per stage because env vars
-        # can't be passed to edge lambdas and we need to set the
-        # S3 bucket accoring to stage.
-        rewrite_function = aws_lambda.Function(
-            self,
-            f"titiler-{stage}-RewriteEdgeFunction",
-            runtime=aws_lambda.Runtime.PYTHON_3_8,
-            handler=f"rewrite_handler_{stage}.handler",
-            code=aws_lambda.Code.from_asset("./resources")
-        )
-
-        rewrite_edge_lambda = cloudfront.EdgeLambda(
-            event_type=cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
-            function_version=rewrite_function.current_version,
-            include_body=False
-        )
-
         # S3 Permissions
         permission = iam.PolicyStatement(
             actions=["s3:GetObject"],
@@ -139,8 +121,7 @@ class TitilerServiceStack(Stack):
                 allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
                 response_headers_policy=response_headers_policy,
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                origin_request_policy=cloudfront.OriginRequestPolicy.CORS_S3_ORIGIN,
-                edge_lambdas=[rewrite_edge_lambda]
+                origin_request_policy=cloudfront.OriginRequestPolicy.CORS_S3_ORIGIN
             )
         )
 
