@@ -4,6 +4,8 @@ from starlette.requests import Request
 import json
 import os
 
+# Middleware adds the CloudFront alternative hostname (e.g. map-tiles.princeton.edu)
+# to a header so that TiTiler can generate TileJSON documents with the correct url.
 class HostMiddleware:
     def __init__(self, app):
         self.app = app
@@ -21,6 +23,16 @@ class HostMiddleware:
 
         await self.app(scope, receive, send)
 
+# Middleware to rewrite requests URLs before passing to TiTiler.
+# https://map-tiles.princeton.edu/{id}/{service} ->
+# https://map-tiles.princeton.edu/{service}?url=s3://{bucket}/{path}
+#
+# Examples:
+#   https://map-tiles.princeton.edu/1234567/mosaicjson?
+#   https://map-tiles.princeton.edu/mosaicjson?url=s3://figgy-geo-production/12/34/56/1234567/mosaic.json
+#
+#   https://map-tiles.princeton.edu/1234567/cog?id=1234567 ->
+#   https://map-tiles.princeton.edu/cog?url=s3://figgy-geo-production/12/34/56/1234567/display_raster.tif
 class RewriteMiddleware:
     def __init__(self, app):
         self.app = app
@@ -59,6 +71,9 @@ class RewriteMiddleware:
         bucket = os.getenv("TITILER_S3_BUCKET")
         return f"s3://{bucket}/{path}"
 
+# Middleware to intercept a tilejson document response and generate
+# a new tile url value with the id of the resource in the path. This is
+# to allow the CloudFront cache to be invalidated when the data is updated.
 class TileJSONMiddleware:
     def __init__(self, app):
         self.app = app
@@ -68,6 +83,7 @@ class TileJSONMiddleware:
             await self.app(scope, receive, send)
             return
         elif "method" in scope.keys() and scope["method"] != "GET":
+            # Do not process tilejson for OPTIONS method (used in CORS preflight request)
             await self.app(scope, receive, send)
             return
 
@@ -79,8 +95,7 @@ class TileJSONMiddleware:
                 # get tiles url and extract the resource id
                 tile_url = URL(obj["tiles"][0])
                 query_params = QueryParams(tile_url.query)
-                url_param = query_params["url"]
-                resource_id = url_param.split("/")[-2]
+                resource_id = query_params["url"].split("/")[-2]
 
                 # generate a new tile url with id in path and no url parameter
                 tile_url = tile_url.remove_query_params("url")
@@ -89,8 +104,6 @@ class TileJSONMiddleware:
 
                 # insert tile url into json object and replace message body
                 obj["tiles"] = [f"{tile_url}"]
-                # raise Exception(message)
-                # import pdb; pdb.set_trace()
                 message["body"] = json.dumps(obj).encode()
 
             await send(message)

@@ -12,7 +12,6 @@ from titiler.core.middleware import LowerCaseQueryStringMiddleware
 # Reset middleware so we can apply our own settings
 app.user_middleware = []
 
-app.add_middleware(LowerCaseQueryStringMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,7 +19,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.add_middleware(LowerCaseQueryStringMiddleware)
 app.add_middleware(middleware.HostMiddleware)
 app.add_middleware(middleware.RewriteMiddleware)
 app.add_middleware(middleware.TileJSONMiddleware)
