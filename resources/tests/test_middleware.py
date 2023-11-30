@@ -7,6 +7,7 @@ from middleware import HostMiddleware, RewriteMiddleware, TileJSONMiddleware
 
 def test_staging_middleware_for_mosaics_with_id_in_url(monkeypatch):
     monkeypatch.setenv('TITILER_BASE_URL', 'base_url')
+    monkeypatch.setenv('TITILER_S3_BUCKET', 'figgy-geo-staging')
     app = FastAPI()
 
     @app.get("/mosaicjson")
@@ -24,6 +25,7 @@ def test_staging_middleware_for_mosaics_with_id_in_url(monkeypatch):
 
 def test_production_middleware_for_mosaics_with_id_in_url(monkeypatch):
     monkeypatch.setenv('TITILER_BASE_URL', 'base_url')
+    monkeypatch.setenv('TITILER_S3_BUCKET', 'figgy-geo-production')
     app = FastAPI()
 
     @app.get("/mosaicjson")
@@ -41,6 +43,7 @@ def test_production_middleware_for_mosaics_with_id_in_url(monkeypatch):
 
 def test_staging_middleware_for_cogs_with_id_in_url(monkeypatch):
     monkeypatch.setenv('TITILER_BASE_URL', 'base_url')
+    monkeypatch.setenv('TITILER_S3_BUCKET', 'figgy-geo-staging')
     app = FastAPI()
 
     @app.get("/cog")
@@ -58,6 +61,7 @@ def test_staging_middleware_for_cogs_with_id_in_url(monkeypatch):
 
 def test_production_middleware_for_cogs_with_id_in_url(monkeypatch):
     monkeypatch.setenv('TITILER_BASE_URL', 'base_url')
+    monkeypatch.setenv('TITILER_S3_BUCKET', 'figgy-geo-production')
     app = FastAPI()
 
     @app.get("/cog")
@@ -75,6 +79,7 @@ def test_production_middleware_for_cogs_with_id_in_url(monkeypatch):
 
 def test_middleware_for_mosaic_tilejson(monkeypatch):
     monkeypatch.setenv('TITILER_BASE_URL', 'base_url')
+    monkeypatch.setenv('TITILER_S3_BUCKET', 'figgy-geo-production')
     app = FastAPI()
 
     @app.get("/mosaicjson/tilejson.json")
@@ -92,6 +97,7 @@ def test_middleware_for_mosaic_tilejson(monkeypatch):
 
 def test_middleware_for_cog_tilejson(monkeypatch):
     monkeypatch.setenv('TITILER_BASE_URL', 'base_url')
+    monkeypatch.setenv('TITILER_S3_BUCKET', 'figgy-geo-production')
     app = FastAPI()
 
     @app.get("/cog/tilejson.json")

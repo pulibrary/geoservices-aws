@@ -34,9 +34,6 @@ class GenericHandler:
           params['url'] = item_url
           params.pop('id')
 
-      # Add stage parameter
-      params['stage'] = self.stage
-
       request['querystring'] = urlencode(params)
       return request
 

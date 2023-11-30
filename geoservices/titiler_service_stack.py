@@ -148,6 +148,9 @@ class TitilerServiceStack(Stack):
         # Used in HostMiddleware.
         lambda_function.add_environment("TITILER_BASE_URL", custom_domain)
 
+        # Add env var to set the correct s3 bucket
+        lambda_function.add_environment("TITILER_S3_BUCKET", f"figgy-geo-{stage}")
+
         CfnOutput(self, "Function URL", value=function_url)
         CfnOutput(self, "Cloudfront Endpoint", value=distribution.domain_name)
 

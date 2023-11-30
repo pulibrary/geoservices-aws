@@ -33,7 +33,6 @@ class RewriteMiddleware:
             return
 
         request = Request(scope)
-        self.stage = request.query_params["stage"]
 
         url = URL(scope=scope)
         path = url.path
@@ -57,10 +56,8 @@ class RewriteMiddleware:
 
     def s3_url(self, resource_id, file_name):
         path = f"{resource_id[0:2]}/{resource_id[2:4]}/{resource_id[4:6]}/{resource_id}/{file_name}"
-        if self.stage == "production":
-            return f"s3://figgy-geo-production/{path}"
-        else:
-            return f"s3://figgy-geo-staging/{path}"
+        bucket = os.getenv("TITILER_S3_BUCKET")
+        return f"s3://{bucket}/{path}"
 
 class TileJSONMiddleware:
     def __init__(self, app):
