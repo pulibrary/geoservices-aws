@@ -58,22 +58,6 @@ class TitilerServiceStack(Stack):
             environment=env,
         )
 
-        # TODO: Remove when staging and production no longer use lambda
-        rewrite_function = aws_lambda.Function(
-            self,
-            f"titiler-{stage}-RewriteEdgeFunction",
-            runtime=aws_lambda.Runtime.PYTHON_3_8,
-            handler=f"rewrite_handler_{stage}.handler",
-            code=aws_lambda.Code.from_asset("./resources")
-        )
-
-        # TODO: Remove when staging and production no longer use lambda
-        rewrite_edge_lambda = cloudfront.EdgeLambda(
-            event_type=cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
-            function_version=rewrite_function.current_version,
-            include_body=False
-        )
-
         # S3 Permissions
         permission = iam.PolicyStatement(
             actions=["s3:GetObject"],
