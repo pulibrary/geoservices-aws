@@ -67,6 +67,18 @@ cdk synth
   cdk --profile geoservices-deploy deploy geodata-production
   ```
 
+## Deploy TiTiler
+
+1. Deploy the staging stack
+  ```
+  cdk --profile geoservices-deploy deploy titiler-staging
+  ```
+
+1. Deploy the production stack
+  ```
+  cdk --profile geoservices-deploy deploy titiler-production
+  ```
+
 To add additional dependencies, for example other CDK libraries, just add
 them with the `pipenv install` command.
 
