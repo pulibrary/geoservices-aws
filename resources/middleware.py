@@ -28,10 +28,10 @@ class HostMiddleware:
 # https://map-tiles.princeton.edu/{service}?url=s3://{bucket}/{path}
 #
 # Examples:
-#   https://map-tiles.princeton.edu/1234567/mosaicjson?
+#   https://map-tiles.princeton.edu/1234567/mosaicjson
 #   https://map-tiles.princeton.edu/mosaicjson?url=s3://figgy-geo-production/12/34/56/1234567/mosaic.json
 #
-#   https://map-tiles.princeton.edu/1234567/cog?id=1234567 ->
+#   https://map-tiles.princeton.edu/1234567/cog ->
 #   https://map-tiles.princeton.edu/cog?url=s3://figgy-geo-production/12/34/56/1234567/display_raster.tif
 class RewriteMiddleware:
     def __init__(self, app):
