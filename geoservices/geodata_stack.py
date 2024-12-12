@@ -104,11 +104,21 @@ class GeodataStack(Stack):
             )
         )
 
-        # Use titiler response policy
-        response_headers_policy = cloudfront.ResponseHeadersPolicy.from_response_headers_policy_id(
-                self,
-                f"geodata-{stage}-responseheaderspolicy",
-                response_headers_policy_id="36af6d78-3c4e-4e15-903f-73b542589a60")
+        response_headers_policy = cloudfront.ResponseHeadersPolicy(self, f"geodata-{stage}-ResponseHeadersPolicy",
+            response_headers_policy_name=f"geodata-{stage}-ResponseHeadersPolicy",
+            comment="Custom response policy with cache-control max-age set to match TTL",
+            cors_behavior=cloudfront.ResponseHeadersCorsBehavior(
+                access_control_allow_credentials=False,
+                access_control_allow_headers=["*"],
+                access_control_allow_methods=["ALL"],
+                access_control_allow_origins=["*"],
+                access_control_expose_headers=["*"],
+                origin_override=True
+            ),
+            custom_headers_behavior=cloudfront.ResponseCustomHeadersBehavior(
+                custom_headers=[cloudfront.ResponseCustomHeader(header="Cache-Control", value="public, max-age= 31536000", override=True)]
+            )
+        )
 
         public_distribution = cloudfront.Distribution(self, f"geodata-public-{stage}-distribution",
             certificate=public_certificate,
