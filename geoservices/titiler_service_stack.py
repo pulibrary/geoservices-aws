@@ -92,8 +92,8 @@ class TitilerServiceStack(Stack):
             enable_accept_encoding_gzip=True,
             enable_accept_encoding_brotli=True
         )
-        response_headers_policy = cloudfront.ResponseHeadersPolicy(self, f"titiler-{stage}-no-geodata-ResponseHeadersPolicy",
-            response_headers_policy_name=f"titiler-{stage}-no-geodata-ResponseHeadersPolicy",
+        response_headers_policy = cloudfront.ResponseHeadersPolicy(self, f"titiler-{stage}-ResponseHeadersPolicy",
+            response_headers_policy_name=f"titiler-{stage}-ResponseHeadersPolicy",
             comment="Custom response policy with cache-control max-age set to match TTL",
             cors_behavior=cloudfront.ResponseHeadersCorsBehavior(
                 access_control_allow_credentials=False,
