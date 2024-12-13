@@ -37,22 +37,17 @@ class TitilerServiceStack(Stack):
             "RIO_TILER_MAX_THREADS": "1" # turn off rio-tiler threading, better for lamda
         }
 
+        ecr_image = aws_lambda.EcrImageCode.from_asset_image(
+            directory = os.path.join(os.getcwd(), "resources")
+        )
+
         # Lambda Function Definition
         lambda_function = aws_lambda.Function(
             self,
-            f"titiler-{stage}-TitilerFuntion",
-            runtime=aws_lambda.Runtime.PYTHON_3_8,
-            code=aws_lambda.Code.from_asset(
-                path=os.path.abspath("./"),
-                bundling=BundlingOptions(
-                    image=DockerImage.from_build(
-                        path = os.path.abspath("./"), file="resources/Dockerfile",
-                        platform = "linux/amd64"
-                    ),
-                    command=["bash", "-c", "cp -R /var/task/. /asset-output/."],
-                ),
-            ),
-            handler="handler.handler",
+            f"titiler-{stage}-TitilerFunction",
+            runtime=aws_lambda.Runtime.FROM_IMAGE,
+            code=ecr_image,
+            handler=aws_lambda.Handler.FROM_IMAGE,
             memory_size=3008,
             timeout=Duration.seconds(600),
             environment=env,
@@ -97,8 +92,8 @@ class TitilerServiceStack(Stack):
             enable_accept_encoding_gzip=True,
             enable_accept_encoding_brotli=True
         )
-        response_headers_policy = cloudfront.ResponseHeadersPolicy(self, f"titiler-{stage}-ResponseHeadersPolicy",
-            response_headers_policy_name=f"titiler-{stage}-ResponseHeadersPolicy",
+        response_headers_policy = cloudfront.ResponseHeadersPolicy(self, f"titiler-{stage}-no-geodata-ResponseHeadersPolicy",
+            response_headers_policy_name=f"titiler-{stage}-no-geodata-ResponseHeadersPolicy",
             comment="Custom response policy with cache-control max-age set to match TTL",
             cors_behavior=cloudfront.ResponseHeadersCorsBehavior(
                 access_control_allow_credentials=False,
