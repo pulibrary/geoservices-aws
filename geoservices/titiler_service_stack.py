@@ -85,9 +85,9 @@ class TitilerServiceStack(Stack):
         cache_policy = cloudfront.CachePolicy(self, f"titiler-{stage}-CachePolicy",
             cache_policy_name=f"titiler-{stage}-CachePolicy",
             comment="Cache policy for TiTiler",
-            default_ttl=Duration.days(365),
-            max_ttl=Duration.days(365),
-            min_ttl=Duration.days(365),
+            default_ttl=Duration.days(36525),
+            max_ttl=Duration.days(36525),
+            min_ttl=Duration.days(36525),
             query_string_behavior=cloudfront.CacheQueryStringBehavior.all(),
             enable_accept_encoding_gzip=True,
             enable_accept_encoding_brotli=True
